@@ -1,0 +1,7 @@
+{
+  "version": 1,
+  "series": [
+    {"id": "north-road", "title": "The North Road", "status": "still-writing", "reader_status": "caught up through book 3", "next_release": "unknown"},
+    {"id": "glass-city", "title": "Glass City", "status": "delayed", "reader_status": "waiting after book 2"}
+  ]
+}
