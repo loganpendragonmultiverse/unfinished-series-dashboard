@@ -10,7 +10,19 @@ def sample():
     return {
         "version": 1,
         "series": [
-            {"id": "a", "title": "Long Wait", "status": "delayed", "reader_status": "book 2"},
+            {
+                "id": "a",
+                "title": "Long Wait",
+                "status": "delayed",
+                "reader_status": "book 2",
+                "owned_volumes": 4,
+                "completed_volumes": 2,
+                "priority": 5,
+                "next_release": "2026-01-01",
+                "format": "ebook",
+                "publisher": "North",
+                "author": "Lee",
+            },
             {"id": "b", "title": "Done", "status": "complete", "reader_status": "finished"},
         ],
     }
@@ -20,9 +32,25 @@ def test_report_filters_and_renders():
     report = build_report(sample(), {"delayed"})
     assert report["total"] == 1
     assert report["counts"]["delayed"] == 1
+    assert report["version"] == 2 and report["resume_queue"][0]["title"] == "Long Wait"
     assert "Long Wait" in render_markdown(report)
     with pytest.raises(ValueError, match="unknown"):
         build_report(sample(), {"lost"})
+
+
+def test_date_buckets_and_filters():
+    report = build_report(
+        sample(),
+        as_of="2026-07-27",
+        date_buckets={"overdue"},
+        formats={"ebook"},
+        publishers={"North"},
+        authors={"Lee"},
+        reader_statuses={"book 2"},
+    )
+    assert report["total"] == 1 and report["series"][0]["remaining_owned"] == 2
+    with pytest.raises(ValueError, match="date bucket"):
+        build_report(sample(), date_buckets={"later"})
 
 
 def test_load_validates(tmp_path):
@@ -54,7 +82,9 @@ def test_rejects_invalid_dashboard_shapes(tmp_path, payload, error):
 def test_cli_json_and_refuses_replace(tmp_path, capsys):
     path = tmp_path / "series.json"
     path.write_text(json.dumps(sample()), encoding="utf-8")
-    assert main([str(path), "--format", "json", "--status", "complete"]) == 0
+    assert (
+        main([str(path), "--format", "json", "--status", "complete", "--as-of", "2026-07-27"]) == 0
+    )
     assert '"total": 1' in capsys.readouterr().out
     output = tmp_path / "report.md"
     output.write_text("keep", encoding="utf-8")
