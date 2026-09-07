@@ -32,13 +32,20 @@ def load_dashboard(path: Path) -> dict[str, Any]:
             raise ValueError(f"series item {index} has unsupported status {status!r}")
         for field in ("owned_volumes", "completed_volumes", "total_volumes", "priority"):
             value = item.get(field)
-            if value is not None and (not isinstance(value, int) or value < 0):
+            if value is not None and (
+                not isinstance(value, int) or isinstance(value, bool) or value < 0
+            ):
                 raise ValueError(f"series item {index} {field} must be a non-negative integer")
+        if item.get("next_release") == "unknown":
+            item["next_release"] = None
         if item.get("next_release"):
             try:
                 date.fromisoformat(str(item["next_release"]))
             except ValueError as exc:
                 raise ValueError(f"series item {index} next_release must be YYYY-MM-DD") from exc
+        for key in ("publisher", "source_notes", "reader_status", "notes"):
+            if key in item and not isinstance(item[key], str):
+                raise ValueError(f"series item {index} {key} must be text")
         seen.add(item_id)
     return data
 
@@ -75,6 +82,7 @@ def build_report(
         item["date_bucket"] = bucket
         item["remaining_owned"] = max(owned - completed, 0)
         item["remaining_total"] = max(int(total) - completed, 0) if total is not None else None
+        item["progress_percent"] = min(100, round(completed / total * 100, 1)) if total else None
         if statuses and item["status"] not in statuses:
             continue
         if date_buckets and bucket not in date_buckets:
