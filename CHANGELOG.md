@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.2.0 - 2026-09-07
+
+- Support unknown release dates and add a local series editor with progress bars, source notes and stale-date review.
+- Added regression coverage for the audited behavior and invalid inputs.
+
 ## 1.1.0 - 2026-07-27
 
 - Added owned, completed, and remaining-volume progress calculations.

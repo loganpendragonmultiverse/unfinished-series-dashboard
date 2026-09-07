@@ -5,6 +5,7 @@ import sys
 from pathlib import Path
 
 from .core import DATE_BUCKETS, STATUSES, build_report, load_dashboard, render_json, render_markdown
+from .preview import render_html
 
 
 def parser() -> argparse.ArgumentParser:
@@ -17,7 +18,7 @@ def parser() -> argparse.ArgumentParser:
     result.add_argument("--publisher", action="append")
     result.add_argument("--author", action="append")
     result.add_argument("--reader-status", action="append")
-    result.add_argument("--format", choices=("markdown", "json"), default="markdown")
+    result.add_argument("--format", choices=("markdown", "json", "html"), default="markdown")
     result.add_argument("--output", type=Path)
     return result
 
@@ -35,7 +36,9 @@ def main(argv: list[str] | None = None) -> int:
             authors=set(args.author or []),
             reader_statuses=set(args.reader_status or []),
         )
-        output = render_json(report) if args.format == "json" else render_markdown(report)
+        output = {"json": render_json, "markdown": render_markdown, "html": render_html}[
+            args.format
+        ](report)
         if args.output:
             if args.output.exists():
                 raise ValueError(f"output already exists: {args.output}")
