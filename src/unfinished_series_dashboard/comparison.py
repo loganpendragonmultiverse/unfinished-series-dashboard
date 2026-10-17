@@ -7,6 +7,8 @@ import html
 import json
 from typing import Any
 
+from .json_equality import json_equal
+
 
 def compare_snapshots(before: list[dict[str, Any]], after: list[dict[str, Any]]) -> dict[str, Any]:
     old = {item["id"]: item for item in before}
@@ -17,7 +19,7 @@ def compare_snapshots(before: list[dict[str, Any]], after: list[dict[str, Any]])
         fields = []
         for field in sorted((old[identity].keys() | new[identity].keys()) - {"id"}):
             a, b = old[identity], new[identity]
-            if (field in a) != (field in b) or a.get(field) != b.get(field):
+            if (field in a) != (field in b) or not json_equal(a.get(field), b.get(field)):
                 fields.append(
                     {
                         "field": field,
