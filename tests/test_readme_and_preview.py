@@ -46,3 +46,35 @@ def test_unknown_dates_progress_and_escaped_notes(tmp_path) -> None:
     assert report["series"][0]["date_bucket"] == "unknown"
     assert "</script><script>bad" not in render_html(report)
     assert "Source and verification notes" in render_html(report)
+
+
+@pytest.mark.parametrize("output_format", ["json", "markdown", "html"])
+def test_null_total_reports_preserve_unknown_and_source(tmp_path, output_format) -> None:
+    source = tmp_path / "unknown.json"
+    original = {
+        "version": 1,
+        "series": [
+            {
+                "id": "unknown",
+                "title": "Unknown total",
+                "status": "incomplete",
+                "total_volumes": None,
+                "completed_volumes": 2,
+                "owned_volumes": 3,
+            }
+        ],
+    }
+    source.write_text(json.dumps(original))
+    before = source.read_bytes()
+    output = tmp_path / ("report." + output_format)
+    assert main([str(source), "--format", output_format, "--output", str(output)]) == 0
+    assert source.read_bytes() == before
+    report = build_report(load_dashboard(source))
+    assert report["series"][0]["total_volumes"] is None
+    assert report["series"][0]["remaining_total"] is None
+    assert report["series"][0]["progress_percent"] is None
+    assert report["series"][0]["remaining_owned"] == 1
+    if output_format == "json":
+        assert json.loads(output.read_text(encoding="utf-8"))["series"][0]["total_volumes"] is None
+    elif output_format == "html":
+        assert '"total_volumes": null' in output.read_text(encoding="utf-8")

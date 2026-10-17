@@ -53,6 +53,7 @@ function validateRecords(records) {
     if (typeof item.title !== 'string' || !item.title.trim()) return 'Every series needs a title.';
     if (!statuses.includes(item.status)) return 'Choose a supported publication status.';
     for (const key of ['completed_volumes','total_volumes','owned_volumes','priority']) {
+      if (key === 'total_volumes' && item[key] === null) continue;
       if (Object.hasOwn(item,key) && (!Number.isSafeInteger(item[key]) || item[key] < 0)) return 'Volume counts and priority must be non-negative safe integers.';
     }
     for (const key of ['publisher','source_notes','reader_status','notes']) {

@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.4.1
+
+- Let the browser editor download records with an unknown `total_volumes: null`, matching accepted CLI reports.
+- Keep other count and priority validation unchanged.
+
 ## 1.4.0
 
 - Add and remove series in the local browser editor with validation before saving a new input.
