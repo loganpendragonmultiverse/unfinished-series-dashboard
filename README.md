@@ -1,5 +1,11 @@
 # Unfinished Series Dashboard
 
+> ⭐ **Gold Star Project — finished for its intended scope.**
+> Scope reviewed for **v1.3.1** on **2026-10-17**. Actively maintained; meaningful future development can reopen the scope.
+> [What Gold Star means](https://www.loganpendragonforge.com/open-source/gold-star/)
+>
+> Manually authored series inventories, progress reports, local editing and saved-snapshot comparison.
+
 ## Current release 1.3.1
 
 Report boolean-to-number changes accurately in JSON comparison evidence.
