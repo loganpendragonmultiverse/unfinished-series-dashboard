@@ -15,7 +15,7 @@
 
 ## Current release 1.4.0
 
-The local browser editor can add series with a unique stable ID and title, update their details, and remove records before downloading a new version 1 input. It checks required fields, supported status, non-negative safe integer counts and real calendar dates before saving. Edits do not rewrite your input file. Filtered reports still contain and export only their selected records; use an unfiltered report to maintain the full inventory.
+The local browser editor can add series with a unique stable ID and title, update their details, and remove records before downloading a new version 1 input. It checks required fields, supported status, non-negative safe integer counts and real calendar dates before saving. Removal asks for confirmation, and leaving with unsaved edits triggers the browser’s warning. Downloading does not prove a file was saved: choose “I saved the download” after saving it to clear the warning; later edits require another download. Add or clear an unfinished new-series form before export. Edits do not rewrite your input file. Browsers may suppress leave warnings, so save a copy before closing. Filtered reports still contain and export only their selected records; use an unfiltered report to maintain the full inventory.
 
 Reports use exclusive file creation. If another process creates the destination just before export, the command returns an error and preserves that file and the input.
 

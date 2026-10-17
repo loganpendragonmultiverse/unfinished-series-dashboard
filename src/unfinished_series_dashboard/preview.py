@@ -13,13 +13,13 @@ section{background:white;border:1px solid #b4c4ca;border-radius:12px;padding:18p
 .fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:16px}
 label{display:block;margin:10px 0}input,select,textarea{font:inherit;box-sizing:border-box;max-width:100%;padding:9px}
 .fields input,.fields select,textarea{width:100%}progress{width:100%;height:20px}button{font:inherit;background:#173d51;color:white;padding:12px;border:0;border-radius:6px}
-</style><h1>Unfinished series editor</h1><p>Edit local records and download a new input. Dates and sources remain your own assertions. This page includes only the report's selected records. Changes stay in this page until you download; your original input is unchanged.</p>
+</style><h1>Unfinished series editor</h1><p>Edit local records and download a new input. Dates and sources remain your own assertions. This page includes only the report's selected records. Edits stay only in this page. Download a new input, then choose “I saved the download” after saving it. Leaving with unsaved edits will warn; your original input is unchanged.</p>
 <section aria-label="Add a series"><h2>Add a series</h2><form id="new-series"><div class="fields">
 <label>Stable ID<input id="add-id" required></label><label>Series title<input id="add-title" required></label>
 <label>Publication status<select id="add-status"><option>incomplete</option><option>abandoned</option><option>delayed</option><option>still-writing</option><option>complete</option></select></label>
-</div><button id="add-series" type="submit">Add series</button></form><p>Choose a unique ID and keep it when comparing saved lists.</p></section>
+</div><button id="add-series" type="submit">Add series</button> <button type="reset">Clear new series</button></form><p>Choose a unique ID and keep it when comparing saved lists.</p></section>
 <label><input id="stale" type="checkbox"> Show dates needing review</label><div id="entries"></div>
-<button id="download" type="button">Download edited dashboard</button><p id="status" role="status"></p>
+<button id="download" type="button">Download edited dashboard</button> <button id="mark-saved" type="button" disabled>I saved the download</button><p id="status" role="status"></p>
 <script type="application/json" id="data">"""
         + payload
         + r"""</script><script>
@@ -27,6 +27,17 @@ const data = JSON.parse(document.getElementById('data').textContent);
 const statuses = ['incomplete','abandoned','delayed','still-writing','complete'];
 const cards = [];
 const message = document.getElementById('status');
+const saved = document.getElementById('mark-saved');
+let dirty = false;
+function draftPending() {
+  return document.getElementById('add-id').value !== '' || document.getElementById('add-title').value !== '' || document.getElementById('add-status').value !== 'incomplete';
+}
+function markDirty() { dirty = true; saved.disabled = true; }
+window.addEventListener('beforeunload', event=>{
+  if (dirty || draftPending()) { event.preventDefault(); event.returnValue = ''; }
+});
+document.getElementById('new-series').addEventListener('input',()=>{ saved.disabled = true; });
+saved.addEventListener('click',()=>{ dirty = false; saved.disabled = true; message.textContent = 'Changes marked saved. Your original input is unchanged.'; });
 function validDate(value) {
   if (value === null || value === '' || value === 'unknown') return true;
   if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(value) || value.startsWith('0000-')) return false;
@@ -80,21 +91,21 @@ function renderEntries() {
         if (type === 'number') {
           if (input.value === '') delete item[key]; else item[key] = Number(input.value);
         } else item[key] = type === 'date' ? (input.value || null) : input.value;
-        refresh();
+        markDirty(); refresh();
       });
       label.append(input); fields.append(label);
     }
     const label = document.createElement('label'); label.textContent = 'Publication status';
     const select = document.createElement('select');
     for (const status of statuses) { const option = document.createElement('option'); option.value = status; option.textContent = status; select.append(option); }
-    select.value = item.status; select.addEventListener('change',()=>{ item.status = select.value; refresh(); });
+    select.value = item.status; select.addEventListener('change',()=>{ item.status = select.value; markDirty(); refresh(); });
     label.append(select); fields.append(label); card.append(fields);
     const noteLabel = document.createElement('label'); noteLabel.textContent = 'Source and verification notes';
     const notes = document.createElement('textarea'); notes.rows = 3; notes.value = item.source_notes ?? '';
-    notes.addEventListener('input',()=>item.source_notes = notes.value); noteLabel.append(notes); card.append(noteLabel);
+    notes.addEventListener('input',()=>{ item.source_notes = notes.value; markDirty(); }); noteLabel.append(notes); card.append(noteLabel);
     const remove = document.createElement('button'); remove.type = 'button'; remove.textContent = 'Remove series';
     remove.setAttribute('aria-label',`Remove series: ${item.title}`);
-    remove.addEventListener('click',()=>{ data.series.splice(data.series.indexOf(item),1); renderEntries(); }); card.append(remove);
+    remove.addEventListener('click',()=>{ if (!window.confirm(`Remove ${item.title} from this page? Download a new input to save this change.`)) return; data.series.splice(data.series.indexOf(item),1); markDirty(); renderEntries(); }); card.append(remove);
     cards.push([item,card,bar,caption,title]); document.getElementById('entries').append(card);
   }
   refresh();
@@ -104,10 +115,11 @@ document.getElementById('new-series').addEventListener('submit',event=>{
   const item = {id:document.getElementById('add-id').value.trim(), title:document.getElementById('add-title').value, status:document.getElementById('add-status').value};
   const error = validateRecords([...data.series,item]);
   if (error) { message.textContent = error; return; }
-  data.series.push(item); document.getElementById('new-series').reset(); renderEntries();
+  data.series.push(item); markDirty(); document.getElementById('new-series').reset(); renderEntries();
 });
 document.getElementById('stale').addEventListener('change',refresh);
 document.getElementById('download').addEventListener('click',()=>{
+  if (draftPending()) { message.textContent = 'Add the new series or clear its fields before downloading.'; return; }
   for (const input of document.querySelectorAll('#entries input')) {
     if (!input.checkValidity()) { input.reportValidity(); return; }
   }
@@ -117,7 +129,8 @@ document.getElementById('download').addEventListener('click',()=>{
   const url = URL.createObjectURL(new Blob([JSON.stringify({version:1,series},null,2)],{type:'application/json'}));
   const a = document.createElement('a'); a.href = url; a.download = 'edited-series-dashboard.json'; a.click();
   setTimeout(()=>URL.revokeObjectURL(url),1000);
-  message.textContent = 'Downloaded a new input. Your original file is unchanged.';
+  saved.disabled = false;
+  message.textContent = 'Download started. After saving the file, choose “I saved the download”. Your original file is unchanged.';
 });
 renderEntries();</script></html>"""
     )

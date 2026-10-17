@@ -38,6 +38,14 @@ def check_browser(browser_type, directory: Path) -> dict:
     page = browser.new_page(accept_downloads=True)
     errors = []
     page.on("pageerror", lambda error: errors.append(str(error)))
+    dialog_action = {"accept": True}
+    dialogs = []
+
+    def handle_dialog(dialog):
+        dialogs.append(dialog.type)
+        dialog.accept() if dialog_action["accept"] else dialog.dismiss()
+
+    page.on("dialog", handle_dialog)
     page.goto(html.as_uri())
     page.locator("#add-id").fill("keep")
     page.locator("#add-title").fill("Duplicate")
@@ -63,6 +71,11 @@ def check_browser(browser_type, directory: Path) -> dict:
     card.get_by_label("Completed volumes", exact=True).fill("2")
     card.get_by_label("Total volumes", exact=True).fill("5")
     assert "2 of 5 completed" in card.inner_text()
+    dialog_action["accept"] = False
+    page.get_by_role("button", name="Remove series: Remove", exact=True).click()
+    assert page.locator("#entries > section").count() == 3
+    assert dialogs[-1] == "confirm"
+    dialog_action["accept"] = True
     page.get_by_role("button", name="Remove series: Remove", exact=True).click()
     assert page.locator("#entries > section").count() == 2
     with page.expect_download() as download:
@@ -88,6 +101,54 @@ def check_browser(browser_type, directory: Path) -> dict:
     page.locator("#add-title").fill("Restart")
     page.locator("#add-series").click()
     assert page.locator("#entries > section").count() == 1
+    dialog_action["accept"] = False
+    page.evaluate("location.reload()")
+    page.wait_for_timeout(200)
+    assert dialogs[-1] == "beforeunload"
+    assert page.locator('section[data-id="restart"]').count() == 1
+    dialog_action["accept"] = True
+    page.reload()
+    assert page.locator("#entries > section").count() == 2
+    page.locator("#add-id").fill("guard")
+    page.locator("#add-title").fill("Guard")
+    page.locator("#add-series").click()
+    dialog_action["accept"] = False
+    page.evaluate("location.href='about:blank'")
+    page.wait_for_timeout(200)
+    assert dialogs[-1] == "beforeunload"
+    assert page.locator('section[data-id="guard"]').count() == 1
+    with page.expect_download() as exported:
+        page.locator("#download").click()
+    exported.value.save_as(directory / "guard.json")
+    assert len(load_dashboard(directory / "guard.json")["series"]) == 3
+    page.locator("#mark-saved").click()
+    count = len(dialogs)
+    page.reload()
+    assert len(dialogs) == count
+    keep = page.locator('section[data-id="keep"]')
+    keep.get_by_label("Title", exact=True).fill("Edited again")
+    assert page.locator("#mark-saved").is_disabled()
+    page.evaluate("location.reload()")
+    page.wait_for_timeout(200)
+    assert dialogs[-1] == "beforeunload"
+    assert keep.get_by_label("Title", exact=True).input_value() == "Edited again"
+    dialog_action["accept"] = True
+    page.reload()
+    page.locator("#add-id").fill("unfinished-form")
+    count = len(downloads)
+    page.locator("#download").click()
+    page.wait_for_timeout(100)
+    assert len(downloads) == count
+    assert "clear its fields" in page.locator("#status").inner_text()
+    dialog_action["accept"] = False
+    page.evaluate("location.reload()")
+    page.wait_for_timeout(200)
+    assert dialogs[-1] == "beforeunload"
+    assert page.locator("#add-id").input_value() == "unfinished-form"
+    page.get_by_role("button", name="Clear new series", exact=True).click()
+    count = len(dialogs)
+    page.reload()
+    assert len(dialogs) == count
     assert source.read_bytes() == before
     assert not errors, errors
     browser.close()
