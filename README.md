@@ -1,20 +1,27 @@
 # Unfinished Series Dashboard
 
-> ⭐ **Gold Star Project — finished for its intended scope.**
-> Scope reviewed for **v1.3.1** on **2026-10-17**. Actively maintained; meaningful future development can reopen the scope.
-> [What Gold Star means](https://www.loganpendragonforge.com/open-source/gold-star/)
+> ⭐ **Gold Star Project**
+> I consider this project complete. Fixes, maintenance and good new ideas are still welcome.
+> [About Gold Stars](https://www.loganpendragonforge.com/open-source/?gold=1)
 >
-> Manually authored series inventories, progress reports, local editing and saved-snapshot comparison.
+> Keep track of unfinished book series, update your reading progress and compare saved copies of your list.
+
+## What you can do
+
+- Track series and reading progress in a local list.
+- Edit progress in the browser and save a new copy.
+- Compare saved lists to see added, removed and changed records.
+
 
 ## Current release 1.3.1
 
-Report boolean-to-number changes accurately in JSON comparison evidence.
+Comparisons now tell the difference between booleans and numbers, even inside nested values.
 
 JSON true differs from 1 and false differs from 0, including inside nested metadata. Numeric 1 and 1.0 compare equally; object key order does not matter, while array order does. Existing field-presence and privacy rules still apply.
 
 ## Current release 1.3.0
 
-Compare saved series inventories by stable ID without looking up or inventing publication facts.
+Compare saved copies of your series list to see what changed.
 
 Use `series-dashboard current.json --compare previous.json --format html --output comparison.html`. Both files must be version 1 input inventories, not rendered reports. Comparison is deterministic by ID and covers full snapshots; dashboard filters cannot be combined with comparison. Missing fields differ from explicit null, list order is significant, and changing an ID appears as removal/addition. Notes in comparison evidence remain private local text; neither input is rewritten.
 
@@ -47,7 +54,7 @@ Run `python -m pip install -e ".[dev]"`, `ruff format --check .`, `ruff check .`
 
 Part of the [Logan Pendragon Forge open-source collection](https://www.loganpendragonforge.com/open-source/). Licensed under the [MIT License](LICENSE).
 
-## Version 1.2.0: reviewed improvements
+## Updates in 1.2.0
 
 Support unknown release dates and add a local series editor with progress bars, source notes and stale-date review.
 
