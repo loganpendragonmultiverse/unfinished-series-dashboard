@@ -75,6 +75,6 @@ def test_null_total_reports_preserve_unknown_and_source(tmp_path, output_format)
     assert report["series"][0]["progress_percent"] is None
     assert report["series"][0]["remaining_owned"] == 1
     if output_format == "json":
-        assert json.loads(output.read_text())["series"][0]["total_volumes"] is None
+        assert json.loads(output.read_text(encoding="utf-8"))["series"][0]["total_volumes"] is None
     elif output_format == "html":
-        assert '"total_volumes": null' in output.read_text()
+        assert '"total_volumes": null' in output.read_text(encoding="utf-8")
