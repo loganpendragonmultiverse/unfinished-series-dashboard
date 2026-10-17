@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.3.0 - 2026-10-17
+
+- Report added, removed, changed and unchanged series between two validated input snapshots
+- Compare authored fields without derived date/progress noise
+- Render comparison evidence in JSON, Markdown and escaped local HTML
+
 ## 1.2.0 - 2026-09-07
 
 - Support unknown release dates and add a local series editor with progress bars, source notes and stale-date review.
