@@ -18,8 +18,12 @@ label{display:block;margin:10px 0}input,select,textarea{font:inherit;box-sizing:
 <button id="download">Download edited dashboard</button><p id="status" role="status"></p>
 <script type="application/json" id="data">"""
         + payload
-        + """</script><script>
+        + r"""</script><script>
 const data=JSON.parse(document.getElementById('data').textContent);const cards=[];
+function validDate(value){
+if(value===null||value==='')return true;
+if(typeof value!=='string'||!/^\d{4}-\d{2}-\d{2}$/.test(value)||value.startsWith('0000-'))return false;
+const parsed=new Date(value+'T00:00:00Z');return Number.isFinite(parsed.getTime())&&parsed.toISOString().slice(0,10)===value;}
 function refresh(){for(const [item,card,bar,caption] of cards){const total=Number(item.total_volumes)||0,done=Number(item.completed_volumes)||0;
 bar.max=total||1;bar.value=Math.min(done,total);caption.textContent=total?`${done} of ${total} completed`:'Total volumes unknown';
 const stale=item.next_release&&item.next_release<data.as_of;
@@ -38,6 +42,7 @@ cards.push([item,card,bar,caption]);document.getElementById('entries').append(ca
 document.getElementById('stale').addEventListener('change',refresh);document.getElementById('download').addEventListener('click',()=>{
 for(const input of document.querySelectorAll('input')){if(!input.checkValidity()){input.reportValidity();return;}}
 if(data.series.some(item=>!item.title||!item.title.trim())){document.getElementById('status').textContent='Every series needs a title.';return;}
+if(data.series.some(item=>item.next_release!==undefined&&!validDate(item.next_release))){document.getElementById('status').textContent='Next release dates must be YYYY-MM-DD or blank for unknown.';return;}
 const series=data.series.map(item=>Object.fromEntries(Object.entries(item).filter(([key])=>!['date_bucket','remaining_owned','remaining_total','progress_percent'].includes(key))));
 const url=URL.createObjectURL(new Blob([JSON.stringify({version:1,series},null,2)],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download='edited-series-dashboard.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
 document.getElementById('status').textContent='Downloaded a new input. Your original file is unchanged.';});refresh();</script></html>"""

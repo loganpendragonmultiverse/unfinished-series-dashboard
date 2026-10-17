@@ -13,13 +13,17 @@
 - Compare saved lists to see added, removed and changed records.
 
 
-## Current release 1.3.1
+## Current release 1.3.2
+
+Release dates and `--as-of` require exact calendar dates in `YYYY-MM-DD` form on every supported Python version. Compact dates, ISO week dates, invalid days and non-text dates are rejected before output. Unknown release dates may still be null, blank or `unknown`. The browser editor validates dates before downloading; canonical dates keep stale-date filtering consistent with the CLI.
+
+## JSON comparisons in 1.3.1
 
 Comparisons now tell the difference between booleans and numbers, even inside nested values.
 
 JSON true differs from 1 and false differs from 0, including inside nested metadata. Numeric 1 and 1.0 compare equally; object key order does not matter, while array order does. Existing field-presence and privacy rules still apply.
 
-## Current release 1.3.0
+## Snapshot comparisons in 1.3.0
 
 Compare saved copies of your series list to see what changed.
 

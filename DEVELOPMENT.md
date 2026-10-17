@@ -31,3 +31,7 @@ Keep track of unfinished book series, update your reading progress and compare s
 Logan considers this project complete. Continue fixes and maintenance, and consider good new ideas. The catalog records the reviewed release.
 
 Definition: https://www.loganpendragonforge.com/open-source/?gold=1
+
+## 1.3.2 canonical dates
+
+Require exact YYYY-MM-DD calendar dates for next_release and as_of across Python 3.10 and newer; retain null/blank/unknown release dates. Reject compact/week/non-text/invalid dates before creating output. Verify the browser download guard and canonical stale-date filtering, with original bytes unchanged.

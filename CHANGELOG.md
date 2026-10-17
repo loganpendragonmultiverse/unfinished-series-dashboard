@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.3.2
+
+- Validate canonical YYYY-MM-DD release/as-of dates consistently across supported Python versions.
+- Guard browser exports against invalid dates and preserve unknown-date and stale-review behavior.
+
 ## 1.3.1 - 2026-10-17
 
 - Distinguish JSON booleans from numbers recursively in objects and arrays
