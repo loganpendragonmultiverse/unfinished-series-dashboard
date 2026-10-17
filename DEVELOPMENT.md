@@ -17,3 +17,9 @@ Local formatting, lint, strict types and regression tests pass. Public release c
 Compare saved series inventories by stable ID without looking up or inventing publication facts.
 
 Use `series-dashboard current.json --compare previous.json --format html --output comparison.html`. Both files must be version 1 input inventories, not rendered reports. Comparison is deterministic by ID and covers full snapshots; dashboard filters cannot be combined with comparison. Missing fields differ from explicit null, list order is significant, and changing an ID appears as removal/addition. Notes in comparison evidence remain private local text; neither input is rewritten.
+
+## 1.3.1 acceptance
+
+Report boolean-to-number changes accurately in JSON comparison evidence.
+
+JSON true differs from 1 and false differs from 0, including inside nested metadata. Numeric 1 and 1.0 compare equally; object key order does not matter, while array order does. Existing field-presence and privacy rules still apply.
