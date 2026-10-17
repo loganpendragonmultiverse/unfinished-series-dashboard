@@ -1,5 +1,11 @@
 # Unfinished Series Dashboard
 
+## Current release 1.3.0
+
+Compare saved series inventories by stable ID without looking up or inventing publication facts.
+
+Use `series-dashboard current.json --compare previous.json --format html --output comparison.html`. Both files must be version 1 input inventories, not rendered reports. Comparison is deterministic by ID and covers full snapshots; dashboard filters cannot be combined with comparison. Missing fields differ from explicit null, list order is significant, and changing an ID appears as removal/addition. Notes in comparison evidence remain private local text; neither input is rewritten.
+
 [![CI](https://github.com/loganpendragonmultiverse/unfinished-series-dashboard/actions/workflows/ci.yml/badge.svg)](https://github.com/loganpendragonmultiverse/unfinished-series-dashboard/actions/workflows/ci.yml)
 
 Unfinished Series Dashboard turns a portable JSON reading list into a clear local report of incomplete, abandoned, delayed, still-writing, and completed series. It records both the publication state and the reader's own position without relying on a proprietary catalog.
