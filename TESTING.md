@@ -17,3 +17,7 @@ Verify Report added, removed, changed and unchanged series between two validated
 Report boolean-to-number changes accurately in JSON comparison evidence.
 
 Verify Distinguish JSON booleans from numbers recursively in objects and arrays; Retain numeric equality for 1 and 1.0, object key-order independence and list order; Add regressions against the public comparison entry point. Run the full existing quality and build gates; release only through protected PR checks and verified tag artifacts.
+
+## 1.3.2 canonical dates
+
+Require exact YYYY-MM-DD calendar dates for next_release and as_of across Python 3.10 and newer; retain null/blank/unknown release dates. Reject compact/week/non-text/invalid dates before creating output. Verify the browser download guard and canonical stale-date filtering, with original bytes unchanged.

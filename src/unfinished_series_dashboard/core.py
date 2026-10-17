@@ -10,6 +10,18 @@ STATUSES = {"incomplete", "abandoned", "delayed", "still-writing", "complete"}
 DATE_BUCKETS = {"upcoming", "overdue", "unknown", "stale"}
 
 
+def _canonical_date(value: Any, field: str) -> str:
+    if not isinstance(value, str):
+        raise TypeError(f"{field} must be YYYY-MM-DD")
+    try:
+        parsed = date.fromisoformat(value)
+        if parsed.isoformat() != value:
+            raise ValueError("noncanonical date")
+    except ValueError as exc:
+        raise ValueError(f"{field} must be YYYY-MM-DD") from exc
+    return value
+
+
 def load_dashboard(path: Path) -> dict[str, Any]:
     data = json.loads(path.read_text(encoding="utf-8"))
     if not isinstance(data, dict) or data.get("version") != 1:
@@ -38,11 +50,9 @@ def load_dashboard(path: Path) -> dict[str, Any]:
                 raise ValueError(f"series item {index} {field} must be a non-negative integer")
         if item.get("next_release") == "unknown":
             item["next_release"] = None
-        if item.get("next_release"):
-            try:
-                date.fromisoformat(str(item["next_release"]))
-            except ValueError as exc:
-                raise ValueError(f"series item {index} next_release must be YYYY-MM-DD") from exc
+        next_release = item.get("next_release")
+        if next_release is not None and next_release != "":
+            _canonical_date(next_release, f"series item {index} next_release")
         for key in ("publisher", "source_notes", "reader_status", "notes"):
             if key in item and not isinstance(item[key], str):
                 raise ValueError(f"series item {index} {key} must be text")
@@ -65,14 +75,18 @@ def build_report(
         raise ValueError("unknown status filter")
     if date_buckets and not date_buckets <= DATE_BUCKETS:
         raise ValueError("unknown date bucket filter")
-    today = date.fromisoformat(as_of) if as_of else datetime.now(timezone.utc).date()
+    today = (
+        date.fromisoformat(_canonical_date(as_of, "as_of"))
+        if as_of is not None
+        else datetime.now(timezone.utc).date()
+    )
     selected = []
     for original in data["series"]:
         item = dict(original)
         next_release = item.get("next_release")
         if not next_release:
             bucket = "unknown"
-        elif date.fromisoformat(str(next_release)) < today:
+        elif date.fromisoformat(_canonical_date(next_release, "next_release")) < today:
             bucket = "stale" if item["status"] == "complete" else "overdue"
         else:
             bucket = "upcoming"
