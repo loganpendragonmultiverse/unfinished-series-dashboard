@@ -23,3 +23,11 @@ Use `series-dashboard current.json --compare previous.json --format html --outpu
 Report boolean-to-number changes accurately in JSON comparison evidence.
 
 JSON true differs from 1 and false differs from 0, including inside nested metadata. Numeric 1 and 1.0 compare equally; object key order does not matter, while array order does. Existing field-presence and privacy rules still apply.
+
+## Gold Star scope review — 2026-10-17
+
+Reviewed release: v1.3.1. Manually authored series inventories, progress reports, local editing and saved-snapshot comparison.
+
+The identified useful scope gaps have been implemented and verified. This review found no remaining meaningful contribution inside the documented purpose; optionality alone is not a reason to exclude a useful in-scope feature. Bugs, compatibility and dependency maintenance remain active work, and a meaningful new idea can reopen the scope. Gold status is bound to the reviewed release in the Forge catalog. Reassess or remove that status when a new gap is identified.
+
+Definition: https://www.loganpendragonforge.com/open-source/gold-star/
