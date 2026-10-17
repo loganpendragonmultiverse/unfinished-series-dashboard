@@ -35,3 +35,11 @@ Definition: https://www.loganpendragonforge.com/open-source/?gold=1
 ## 1.3.2 canonical dates
 
 Require exact YYYY-MM-DD calendar dates for next_release and as_of across Python 3.10 and newer; retain null/blank/unknown release dates. Reject compact/week/non-text/invalid dates before creating output. Verify the browser download guard and canonical stale-date filtering, with original bytes unchanged.
+
+## 1.4.0 output and snapshot fidelity
+
+Create JSON, Markdown and HTML reports exclusively and preserve a destination created immediately before opening. Keep authored unknown, null, blank and missing release dates distinct in snapshot comparisons while treating each as an unknown date for dashboard filtering. Preserve source bytes and unchanged browser-export values.
+
+The browser editor supports adding and removing records, including an empty inventory. Reject duplicate/blank IDs and titles, invalid statuses, fractional/negative/unsafe counts and invalid dates before download. Preserve untouched authored values and extra fields. Test add/edit/remove/download and CLI revalidation in Chromium, Firefox and WebKit, including filtered reports; original input bytes must stay unchanged.
+
+Confirm removals before changing records. Warn on navigation/reload with unsaved record edits or an unfinished new-series form. A download does not prove persistence: only the user's saved-download acknowledgment clears the record-edit warning, and further edits require another export. Exercise accept/cancel, export, acknowledgment, rearming and reload in all three browser engines; do not use persistent browser storage.

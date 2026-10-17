@@ -48,10 +48,8 @@ def load_dashboard(path: Path) -> dict[str, Any]:
                 not isinstance(value, int) or isinstance(value, bool) or value < 0
             ):
                 raise ValueError(f"series item {index} {field} must be a non-negative integer")
-        if item.get("next_release") == "unknown":
-            item["next_release"] = None
         next_release = item.get("next_release")
-        if next_release is not None and next_release != "":
+        if next_release is not None and next_release not in ("", "unknown"):
             _canonical_date(next_release, f"series item {index} next_release")
         for key in ("publisher", "source_notes", "reader_status", "notes"):
             if key in item and not isinstance(item[key], str):
@@ -84,7 +82,7 @@ def build_report(
     for original in data["series"]:
         item = dict(original)
         next_release = item.get("next_release")
-        if not next_release:
+        if not next_release or next_release == "unknown":
             bucket = "unknown"
         elif date.fromisoformat(_canonical_date(next_release, "next_release")) < today:
             bucket = "stale" if item["status"] == "complete" else "overdue"

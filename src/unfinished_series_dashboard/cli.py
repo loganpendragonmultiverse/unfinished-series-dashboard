@@ -67,9 +67,8 @@ def main(argv: list[str] | None = None) -> int:
         elif args.compare and args.format == "html":
             output = output.replace("</html>", comparison_html(report["comparison"]) + "</html>")
         if args.output:
-            if args.output.exists():
-                raise ValueError(f"output already exists: {args.output}")
-            args.output.write_text(output, encoding="utf-8")
+            with args.output.open("x", encoding="utf-8") as stream:
+                stream.write(output)
         else:
             sys.stdout.write(output)
     except (OSError, TypeError, ValueError, KeyError) as exc:
