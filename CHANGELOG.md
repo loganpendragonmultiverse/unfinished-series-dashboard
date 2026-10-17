@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.4.0
+
+- Add and remove series in the local browser editor with validation before saving a new input.
+
+- Preserve report destinations created concurrently with export in every format.
+- Retain authored unknown-date values in saved-snapshot comparisons and browser downloads.
+
 ## 1.3.2
 
 - Validate canonical YYYY-MM-DD release/as-of dates consistently across supported Python versions.
