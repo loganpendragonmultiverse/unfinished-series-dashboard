@@ -13,7 +13,11 @@
 - Compare saved lists to see added, removed and changed records.
 
 
-## Current release 1.4.0
+## Current release 1.4.1
+
+An unknown volume total may be written as `total_volumes: null`. The CLI report and browser download preserve that value, including an untouched export. Other supplied volume counts and priority must remain non-negative safe integers in the browser.
+
+## Earlier release 1.4.0
 
 The local browser editor can add series with a unique stable ID and title, update their details, and remove records before downloading a new version 1 input. It checks required fields, supported status, non-negative safe integer counts and real calendar dates before saving. Removal asks for confirmation, and leaving with unsaved edits triggers the browser’s warning. Downloading does not prove a file was saved: choose “I saved the download” after saving it to clear the warning; later edits require another download. Add or clear an unfinished new-series form before export. Edits do not rewrite your input file. Browsers may suppress leave warnings, so save a copy before closing. Filtered reports still contain and export only their selected records; use an unfiltered report to maintain the full inventory.
 

@@ -12,7 +12,71 @@ from unfinished_series_dashboard.cli import main
 from unfinished_series_dashboard.core import load_dashboard
 
 
+def check_unknown_total(browser_type, directory: Path) -> None:
+    source = directory / "unknown-total.json"
+    original = {
+        "version": 1,
+        "series": [
+            {
+                "id": "unknown",
+                "title": "Unknown total",
+                "status": "incomplete",
+                "total_volumes": None,
+                "completed_volumes": 2,
+                "owned_volumes": 3,
+                "priority": 1,
+            }
+        ],
+    }
+    source.write_text(json.dumps(original))
+    before = source.read_bytes()
+    html = directory / "unknown-total.html"
+    assert main([str(source), "--format", "html", "--output", str(html)]) == 0
+    browser = browser_type.launch()
+    page = browser.new_page(accept_downloads=True)
+    errors = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    page.goto(html.as_uri())
+    with page.expect_download() as download:
+        page.locator("#download").click()
+    output = directory / "unknown-total-edited.json"
+    download.value.save_as(output)
+    assert json.loads(output.read_text()) == original
+    assert (
+        main(
+            [
+                str(output),
+                "--format",
+                "json",
+                "--output",
+                str(directory / "unknown-total-validated.json"),
+            ]
+        )
+        == 0
+    )
+    downloads = []
+    page.on("download", lambda download: downloads.append(download))
+    for key in ("total_volumes", "owned_volumes", "completed_volumes", "priority"):
+        for value in (None, -1, 1.5, True, 9007199254740992, "infinity"):
+            if key == "total_volumes" and value is None:
+                continue
+            page.evaluate(
+                """([original,key,value])=>{
+                data.series[0] = {...original, [key]: value === 'infinity' ? Infinity : value};
+            }""",
+                [original["series"][0], key, value],
+            )
+            page.locator("#download").click()
+            page.wait_for_timeout(30)
+            assert not downloads
+            assert "non-negative safe integers" in page.locator("#status").inner_text()
+    assert source.read_bytes() == before
+    assert not errors, errors
+    browser.close()
+
+
 def check_browser(browser_type, directory: Path) -> dict:
+    check_unknown_total(browser_type, directory)
     source = directory / "input.json"
     original = {
         "version": 1,

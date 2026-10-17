@@ -43,3 +43,7 @@ Create JSON, Markdown and HTML reports exclusively and preserve a destination cr
 The browser editor supports adding and removing records, including an empty inventory. Reject duplicate/blank IDs and titles, invalid statuses, fractional/negative/unsafe counts and invalid dates before download. Preserve untouched authored values and extra fields. Test add/edit/remove/download and CLI revalidation in Chromium, Firefox and WebKit, including filtered reports; original input bytes must stay unchanged.
 
 Confirm removals before changing records. Warn on navigation/reload with unsaved record edits or an unfinished new-series form. A download does not prove persistence: only the user's saved-download acknowledgment clears the record-edit warning, and further edits require another export. Exercise accept/cancel, export, acknowledgment, rearming and reload in all three browser engines; do not use persistent browser storage.
+
+## 1.4.1 unknown volume totals
+
+Preserve `total_volumes: null` as an unknown total when downloading an unchanged generated editor. This exception applies only to the total, not owned/completed counts or priority. Keep fractional, negative, boolean, non-finite and unsafe browser numbers blocked. Exercise generated HTML, untouched download and CLI reimport in Chromium, Firefox and WebKit; preserve original input bytes.
